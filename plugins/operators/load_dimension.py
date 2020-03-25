@@ -2,21 +2,30 @@ from airflow.hooks.postgres_hook import PostgresHook
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
 
+
 class LoadDimensionOperator(BaseOperator):
+    """
+    Loads dimension table.
+    """
 
     ui_color = '#80BD9E'
+    sql = """
+        INSERT INTO {table}
+        {select_sql};
+    """
 
     @apply_defaults
     def __init__(self,
-                 # Define your operators params (with defaults) here
-                 # Example:
-                 # conn_id = your-connection-name
+                 table,
+                 redshift_conn_id='redshift',
+                 select_sql='',
                  *args, **kwargs):
-
         super(LoadDimensionOperator, self).__init__(*args, **kwargs)
-        # Map params here
-        # Example:
-        # self.conn_id = conn_id
+        self.redshift_conn_id = redshift_conn_id
+        self.table = table
+        self.select_sql = select_sql
 
     def execute(self, context):
-        self.log.info('LoadDimensionOperator not implemented yet')
+        redshift_hook = PostgresHook(self.redshift_conn_id)
+        self.sql = self.sql.format(table=self.table, select_sql=self.select_sql)
+        redshift_hook.run(self.sql)
