@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 import os
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
-from airflow.operators import (PostgresOperator,
-                               StageToRedshiftOperator, LoadFactOperator,
+from airflow.operators.postgres_operator import PostgresOperator
+from operators import (StageToRedshiftOperator, LoadFactOperator,
                                LoadDimensionOperator, DataQualityOperator)
 from helpers import SqlQueries
 

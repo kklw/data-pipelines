@@ -3,3 +3,4 @@ plugins/operators/__pycache__/
 plugins/helpers/__pycache__/
 dags/__pycache__/
 .idea/
+venv/
