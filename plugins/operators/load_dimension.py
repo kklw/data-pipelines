@@ -13,6 +13,9 @@ class LoadDimensionOperator(BaseOperator):
         INSERT INTO {table}
         {select_sql};
     """
+    truncate_sql = """
+        TRUNCATE TABLE {table}
+    """
 
     @apply_defaults
     def __init__(self,
@@ -23,9 +26,11 @@ class LoadDimensionOperator(BaseOperator):
         super(LoadDimensionOperator, self).__init__(*args, **kwargs)
         self.redshift_conn_id = redshift_conn_id
         self.table = table
-        self.select_sql = select_sql
+        self.sql = self.sql.format(table=self.table, select_sql=select_sql)
+        self.truncate_sql = self.truncate_sql.format(table=self.table)
 
     def execute(self, context):
         redshift_hook = PostgresHook(self.redshift_conn_id)
-        self.sql = self.sql.format(table=self.table, select_sql=self.select_sql)
+        if not self.append_insert:
+            redshift_hook.run(self.truncate_sql)
         redshift_hook.run(self.sql)
